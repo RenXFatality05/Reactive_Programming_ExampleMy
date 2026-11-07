@@ -1,1 +1,4 @@
-<div class="bg-info text-white p-2">Маємо {{ count }} продуктів в моделі</div>
+<div class="bg-info text-white p-2">Маємо {{ count() }} продуктів в моделі</div>
+<div class="bg-primary text-white p-2">{{ message() }}</div>
+<button type="button" class="btn btn-primary m-2" (click)="toggleMessage()">Toggle</button>
+<button type="button" class="btn btn-primary m-2" (click)="removeProduct()">Remove</button>
