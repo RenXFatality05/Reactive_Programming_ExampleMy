@@ -1,15 +1,17 @@
+import { signal } from '@angular/core';
 import { SimpleDataSource } from './datasource.model';
 import { Product } from './product.model';
 
 export class Model {
-  private readonly products = [...new SimpleDataSource().getData()];
+  private readonly products = signal([...new SimpleDataSource().getData()]);
+  readonly Products = this.products.asReadonly();
 
   getProducts(): Product[] {
-    return this.products;
+    return this.Products();
   }
 
   getProduct(id: number): Product | undefined {
-    return this.products.find(product => product.id === id);
+    return this.Products().find(product => product.id === id);
   }
 
   saveProduct(product: Product): void {
@@ -17,20 +19,29 @@ export class Model {
       product.id = this.generateID();
     }
 
-    const index = this.products.findIndex(existing => existing.id === product.id);
-    if (index === -1) {
-      this.products.push(product);
-    } else {
-      this.products[index] = product;
-    }
+    this.products.update(products => {
+      const index = products.findIndex(existing => existing.id === product.id);
+      if (index === -1) {
+        return [...products, product];
+      }
+
+      const updated = [...products];
+      updated[index] = product;
+      return updated;
+    });
   }
 
   deleteProduct(id: number): void {
-    const index = this.products.findIndex(product => product.id === id);
-    if (index !== -1) {
-      this.products.splice(index, 1);
-    }
+    this.products.update(products => {
+      const index = products.findIndex(product => product.id === id);
+      if (index === -1) {
+        return products;
+      }
+
+      return products.filter((_, productIndex) => productIndex !== index);
+    });
   }
+
 
   private generateID(): number {
     let candidate = 100;
